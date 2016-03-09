@@ -1,0 +1,7 @@
+﻿  Source.cpp
+f:\pc\school\cs 423\cs_423_thompson_charles_project_1\cs_423_thompson_charles_project_1\source.cpp(42): warning C4473: 'printf' : not enough arguments passed for format string
+  f:\pc\school\cs 423\cs_423_thompson_charles_project_1\cs_423_thompson_charles_project_1\source.cpp(42): note: placeholders and their parameters expect 1 variadic arguments, but 0 were provided
+  f:\pc\school\cs 423\cs_423_thompson_charles_project_1\cs_423_thompson_charles_project_1\source.cpp(42): note: the missing variadic argument 1 is required by format string '%s'
+f:\pc\school\cs 423\cs_423_thompson_charles_project_1\cs_423_thompson_charles_project_1\source.cpp(35): warning C4101: 'p': unreferenced local variable
+  CS_423_Thompson_Charles_Project_1.vcxproj -> F:\pc\School\CS 423\CS_423_Thompson_Charles_Project_1\Debug\CS_423_Thompson_Charles_Project_1.exe
+  CS_423_Thompson_Charles_Project_1.vcxproj -> F:\pc\School\CS 423\CS_423_Thompson_Charles_Project_1\Debug\CS_423_Thompson_Charles_Project_1.pdb (Partial PDB)
