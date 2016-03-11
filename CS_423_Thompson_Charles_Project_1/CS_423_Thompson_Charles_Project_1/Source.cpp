@@ -13,9 +13,9 @@ int main(int argc, char *argv[]) {
 	WSADATA wsa;
 	SOCKET s;
 	struct sockaddr_in server;
-	char *message, server_reply[500];
-	int recv_size;
-	int return_value;
+	char *message, server_reply[500], userSelection, *userName, *userBuddy, *msgToSend;
+	int recv_size, return_value, msgNum;
+	string msg;
 
 	cout << "Initialising Winsock...." << endl;
 
@@ -48,14 +48,61 @@ int main(int argc, char *argv[]) {
 	int optval = 1;
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
 
+	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 28781\n Enter your IM name... ";
+	cin >> userName;
+	userName += '\n';
+	msgNum = msgNumber();
 	//Send some data	
-	//message = "Hello world";
-	//if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
-	//	cout << "Send Failed" << endl;
-	//	return 1;
-	//}
+	msg = msgNum + ";1;" + encrypt(userName);
+	message = msg.c_str;
+	msgNum += 2;
+	if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
+		cout << "Send Failed" << endl;
+		return 1;
+	}
 
 	cout << "Data Sent" << endl;
+
+	do {
+		//Receive a reply from the server	
+		if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
+			cout << "recv failed" << endl;
+			return 1;
+		}
+
+		cout << "reply Received" << endl;
+		server_reply[recv_size] = '\0';	//puts(server_reply);	
+		cout << decrypt(server_reply) << endl;
+		cout << "Enter q (for quit), s (send msg), or c (check for msgs)c\n";
+		cin >> userSelection;
+		switch(tolower(userSelection)){
+			case 's':
+				msg = msgNum + ";2;" + encrypt(userName);
+				cout << "Enter Buddy Name: ";
+				cin >> userBuddy;
+				userBuddy += '\n';
+				msg += encrypt(userBuddy);
+				cout << "Enter Your Message: ";
+				cin >> msgToSend;
+				msgToSend += '\n';
+				msg += encrypt(msgToSend);
+				message = msg.c_str;
+				if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
+					cout << "Send Failed" << endl;
+					return 1;
+				}
+				msgNum += 2;
+				break;
+			case 'c':
+				cout << "";
+				break;
+			case 'q':
+				msg = msgNum + ";3;" + encrypt(userName);
+				cout << "Good Bye\n";
+				break;
+		}
+	} while (userSelection != 'q');
+
 
 	//Receive a reply from the server	
 	if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
@@ -67,10 +114,11 @@ int main(int argc, char *argv[]) {
 
 	//Add \0 at the end of received string string before printing	
 	server_reply[recv_size] = '\0';	//puts(server_reply);	
-	cout << server_reply << endl;
+	cout << decrypt(server_reply) << endl;
 
 	//Program end
 	closesocket(s);
 	WSACleanup();
 	return 0;
 }
+

@@ -30,3 +30,22 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 '6', 'P', '\t', '\f', 'w', '+', '[', 'I', 'L', '=', 'o', '9', 'm', 'x', '(', '-',
 '>', '#', '0', ')', 's', '!', '*', 'h', 'S', 'T', '4', 'K', 'k', 'j', '~', 0,
 0, 0 };
+
+
+char encrypt(char *message) {
+	char encryptedMsg;
+	encryptedMsg = encr[(int)message];
+	return encryptedMsg;
+}
+
+char decrypt(char *message) {
+	char decryptedMsg;
+	decryptedMsg = decr[(int)message];
+	return decryptedMsg;
+}
+
+int msgNumber () {
+	int x;
+	x = rand() % 50000 + 10000;
+	return x;
+}
