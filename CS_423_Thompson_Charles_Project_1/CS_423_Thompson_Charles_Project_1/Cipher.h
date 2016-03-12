@@ -32,14 +32,16 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 0, 0 };
 
 
-char encrypt(char *message) {
-	char encryptedMsg;
-	encryptedMsg = encr[(int)message];
+char encrypt(char message) {
+	char encryptedMsg = ' ';
+	while(1) { 
+		encryptedMsg += encr[(int)message];
+	}
 	return encryptedMsg;
 }
 
-char decrypt(char *message) {
-	char decryptedMsg;
+char decrypt(char message) {
+	char decryptedMsg = ' ';
 	decryptedMsg = decr[(int)message];
 	return decryptedMsg;
 }

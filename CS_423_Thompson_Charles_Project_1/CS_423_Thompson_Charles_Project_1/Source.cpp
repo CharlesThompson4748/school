@@ -13,9 +13,13 @@ int main(int argc, char *argv[]) {
 	WSADATA wsa;
 	SOCKET s;
 	struct sockaddr_in server;
-	char *message, server_reply[500], userSelection, *userName, *userBuddy, *msgToSend;
+	char server_reply[500], userSelection;
+	char userName;
+	char userBuddy = NULL;
+	char msgToSend = NULL;
 	int recv_size, return_value, msgNum;
 	string msg;
+	const char* message = " ";
 
 	cout << "Initialising Winsock...." << endl;
 
@@ -48,14 +52,20 @@ int main(int argc, char *argv[]) {
 	int optval = 1;
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
 
-	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 28781\n Enter your IM name... ";
+	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 23456\n Enter your IM name... ";
 	cin >> userName;
 	userName += '\n';
 	msgNum = msgNumber();
+	cout << "ACK NUM: " << msgNum << endl;
 	//Send some data	
-	msg = msgNum + ";1;" + encrypt(userName);
-	message = msg.c_str;
+	cout << "Encrypted Name: " << encrypt(userName) << endl;
+
+	msg = msgNum + ";1;" + encrypt(userName); //problem here
+	cout << "MSG: " << message << endl;
+	message = msg.c_str(); //problem here
+	cout << "Message Converted: " << message << endl;
 	msgNum += 2;
+	cout << "New ACK NUM: " << msgNum << endl;
 	if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 		cout << "Send Failed" << endl;
 		return 1;
@@ -72,7 +82,7 @@ int main(int argc, char *argv[]) {
 
 		cout << "reply Received" << endl;
 		server_reply[recv_size] = '\0';	//puts(server_reply);	
-		cout << decrypt(server_reply) << endl;
+		//cout << decrypt(server_reply) << endl;
 		cout << "Enter q (for quit), s (send msg), or c (check for msgs)c\n";
 		cin >> userSelection;
 		switch(tolower(userSelection)){
@@ -86,7 +96,7 @@ int main(int argc, char *argv[]) {
 				cin >> msgToSend;
 				msgToSend += '\n';
 				msg += encrypt(msgToSend);
-				message = msg.c_str;
+				message = msg.c_str();
 				if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 					cout << "Send Failed" << endl;
 					return 1;
@@ -114,7 +124,7 @@ int main(int argc, char *argv[]) {
 
 	//Add \0 at the end of received string string before printing	
 	server_reply[recv_size] = '\0';	//puts(server_reply);	
-	cout << decrypt(server_reply) << endl;
+	//cout << decrypt(server_reply) << endl;
 
 	//Program end
 	closesocket(s);
