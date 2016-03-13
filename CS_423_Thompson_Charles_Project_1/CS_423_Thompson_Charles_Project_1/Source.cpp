@@ -23,17 +23,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	//Create a socket	
-	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
-		printf("Could not create socket : %d", WSAGetLastError());
-	}
-
 	struct addrinfo server_struct, *servinfo, *p;
 
 	memset(&server_struct, 0, sizeof server_struct);
 	server_struct.ai_family = AF_INET;
 	server_struct.ai_socktype = SOCK_DGRAM;
-	server_struct.ai_protocol = IPPROTO_UDP;
 
 	if ((return_value = getaddrinfo("204.76.188.23", "23456", &server_struct, &servinfo)) != 0) {
 		printf("getaddrinfo: %s\n");
@@ -41,9 +35,14 @@ int main(int argc, char *argv[]) {
 
 	}
 
+	//Create a socket	
+	if ((s = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == INVALID_SOCKET) {
+		printf("Could not create socket : %d", WSAGetLastError());
+	}
+
 	//set SO_RESESADDR on a socket s to true	
 	int optval = 1;
-	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
+	setsockopt(return_value, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
 
 	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 23456\n Enter your IM name... ";
 	cin >> userName;
@@ -58,9 +57,8 @@ int main(int argc, char *argv[]) {
 
 	cout << "Data ready to send." << endl;
 	cout << "message length: " << strlen(message) << endl;
-	if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
-		cout << "Send Failed" << endl;
-		cout << GetLastError();
+	if (sendto(s, message, strlen(message), 0, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+		cout << "Send Failed " << GetLastError() << endl;
 		system("pause");
 		//return 1;
 	}
@@ -78,7 +76,7 @@ int main(int argc, char *argv[]) {
 		cout << "reply Received" << endl;
 		server_reply[recv_size] = '\0';	//puts(server_reply);	
 		cout << decrypt(server_reply) << endl;
-		cout << "Enter q (for quit), s (send msg), or c (check for msgs)c\n";
+		cout << "Enter q (for quit), s (send msg), or c (check for msgs)\n";
 		cin >> userSelection;
 		switch(tolower(userSelection)){
 			case 's':
