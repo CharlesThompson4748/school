@@ -1,11 +1,8 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-
 #include <stdio.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <iostream>
 #include "Cipher.h"
-
 #pragma comment(lib, "Ws2_32")
 using namespace std;
 
@@ -14,8 +11,8 @@ int main(int argc, char *argv[]) {
 	SOCKET s;
 	struct sockaddr_in server;
 	char server_reply[500], userSelection;
-	char userName;
-	char userBuddy = NULL;
+	string userName;
+	string userBuddy;
 	char msgToSend = NULL;
 	int recv_size, return_value, msgNum;
 	string msg;
@@ -35,7 +32,7 @@ int main(int argc, char *argv[]) {
 		printf("Could not create socket : %d", WSAGetLastError());
 	}
 
-	//cout << "socket created" << endl;
+	cout << "socket created" << endl;
 	struct addrinfo server_struct, *servinfo, *p;
 
 	memset(&server_struct, 0, sizeof server_struct);
@@ -47,7 +44,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 
 	}
-
+	cout << "getaddrinfo successful" << endl;
 	//set SO_RESESADDR on a socket s to true	
 	int optval = 1;
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
@@ -55,20 +52,30 @@ int main(int argc, char *argv[]) {
 	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 23456\n Enter your IM name... ";
 	cin >> userName;
 	userName += '\n';
+	cout << userName << endl;
+
 	msgNum = msgNumber();
 	cout << "ACK NUM: " << msgNum << endl;
-	//Send some data	
-	cout << "Encrypted Name: " << encrypt(userName) << endl;
 
-	msg = msgNum + ";1;" + encrypt(userName); //problem here
-	cout << "MSG: " << message << endl;
+	userName = encrypt(userName);
+	//Send some data	
+	cout << "Encrypted Name: " << userName << endl;
+
+	msg = to_string(msgNum);
+	msg += ";1;";
+	msg += userName; //problem here
+	cout << "MSG: " << msg << endl;
+
 	message = msg.c_str(); //problem here
 	cout << "Message Converted: " << message << endl;
+
 	msgNum += 2;
 	cout << "New ACK NUM: " << msgNum << endl;
+
 	if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 		cout << "Send Failed" << endl;
-		return 1;
+		system("pause");
+		//return 1;
 	}
 
 	cout << "Data Sent" << endl;
@@ -77,12 +84,13 @@ int main(int argc, char *argv[]) {
 		//Receive a reply from the server	
 		if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
 			cout << "recv failed" << endl;
-			return 1;
+			system("pause");
+			//return 1;
 		}
 
 		cout << "reply Received" << endl;
 		server_reply[recv_size] = '\0';	//puts(server_reply);	
-		//cout << decrypt(server_reply) << endl;
+		cout << decrypt(server_reply) << endl;
 		cout << "Enter q (for quit), s (send msg), or c (check for msgs)c\n";
 		cin >> userSelection;
 		switch(tolower(userSelection)){
@@ -95,10 +103,11 @@ int main(int argc, char *argv[]) {
 				cout << "Enter Your Message: ";
 				cin >> msgToSend;
 				msgToSend += '\n';
-				msg += encrypt(msgToSend);
+				//msg += encrypt(msgToSend);
 				message = msg.c_str();
 				if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 					cout << "Send Failed" << endl;
+					system("pause");
 					return 1;
 				}
 				msgNum += 2;
@@ -117,6 +126,7 @@ int main(int argc, char *argv[]) {
 	//Receive a reply from the server	
 	if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
 		cout << "recv failed" << endl;
+		system("pause");
 		return 1;
 	}
 

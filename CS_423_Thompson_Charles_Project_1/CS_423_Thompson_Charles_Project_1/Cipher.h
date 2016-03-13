@@ -1,4 +1,7 @@
-
+#include <time.h>
+#include <iostream>
+#include <string>
+using namespace std;
 /**************************************
 *   File Name:  cipher_sp14.h
 *   Author:     Bob Cotter
@@ -32,20 +35,25 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 0, 0 };
 
 
-char encrypt(char message) {
-	char encryptedMsg = ' ';
-	encryptedMsg += encr[(int)message];
-	return encryptedMsg;
+string encrypt(string message) {
+	string encryptedMsg;
+	for (int i = 0; i < message.size(); i++) {
+		encryptedMsg += encr[(int)message[i]];
+	}
+	return encryptedMsg; 
 }
 
-char decrypt(char message) {
-	char decryptedMsg = ' ';
-	decryptedMsg = decr[(int)message];
+string decrypt(string message) {
+	string decryptedMsg;
+	for (int i = 0; i < message.size(); i++) {
+		decryptedMsg += encr[(int)message[i]];
+	}
 	return decryptedMsg;
 }
 
 int msgNumber () {
 	int x;
+	srand(time(NULL));
 	x = rand() % 50000 + 10000;
 	return x;
 }
