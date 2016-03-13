@@ -13,38 +13,34 @@ int main(int argc, char *argv[]) {
 	char server_reply[500], userSelection;
 	string userName;
 	string userBuddy;
-	char msgToSend = NULL;
+	string msgToSend;
 	int recv_size, return_value, msgNum;
 	string msg;
-	const char* message = " ";
-
-	cout << "Initialising Winsock...." << endl;
+	const char* message;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 		printf("Failed. Error Code : %d", WSAGetLastError());		
 		return 1;
 	}
 
-	cout << "Initialised" << endl;
-
 	//Create a socket	
-	if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
+	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
 		printf("Could not create socket : %d", WSAGetLastError());
 	}
 
-	cout << "socket created" << endl;
 	struct addrinfo server_struct, *servinfo, *p;
 
 	memset(&server_struct, 0, sizeof server_struct);
-	server_struct.ai_family = AF_UNSPEC;
-	server_struct.ai_socktype = SOCK_STREAM;
+	server_struct.ai_family = AF_INET;
+	server_struct.ai_socktype = SOCK_DGRAM;
+	server_struct.ai_protocol = IPPROTO_UDP;
 
 	if ((return_value = getaddrinfo("204.76.188.23", "23456", &server_struct, &servinfo)) != 0) {
 		printf("getaddrinfo: %s\n");
 		return 1;
 
 	}
-	cout << "getaddrinfo successful" << endl;
+
 	//set SO_RESESADDR on a socket s to true	
 	int optval = 1;
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
@@ -52,28 +48,19 @@ int main(int argc, char *argv[]) {
 	cout << "Our target server is at address 204.76.188.23 \n Our starting message number is 23456\n Enter your IM name... ";
 	cin >> userName;
 	userName += '\n';
-	cout << userName << endl;
-
 	msgNum = msgNumber();
-	cout << "ACK NUM: " << msgNum << endl;
-
 	userName = encrypt(userName);
+
 	//Send some data	
-	cout << "Encrypted Name: " << userName << endl;
-
-	msg = to_string(msgNum);
-	msg += ";1;";
-	msg += userName; //problem here
-	cout << "MSG: " << msg << endl;
-
-	message = msg.c_str(); //problem here
-	cout << "Message Converted: " << message << endl;
-
+	msg = createMessage(userName, userBuddy, "", msgNum, 1);
+	message = msg.c_str();
 	msgNum += 2;
-	cout << "New ACK NUM: " << msgNum << endl;
 
+	cout << "Data ready to send." << endl;
+	cout << "message length: " << strlen(message) << endl;
 	if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 		cout << "Send Failed" << endl;
+		cout << GetLastError();
 		system("pause");
 		//return 1;
 	}
@@ -95,15 +82,13 @@ int main(int argc, char *argv[]) {
 		cin >> userSelection;
 		switch(tolower(userSelection)){
 			case 's':
-				msg = msgNum + ";2;" + encrypt(userName);
 				cout << "Enter Buddy Name: ";
 				cin >> userBuddy;
-				userBuddy += '\n';
-				msg += encrypt(userBuddy);
 				cout << "Enter Your Message: ";
-				cin >> msgToSend;
-				msgToSend += '\n';
-				//msg += encrypt(msgToSend);
+				cin.ignore();
+				getline(cin,msgToSend);
+				msg = createMessage(userName, userBuddy, msgToSend, msgNum, 2);
+				cout << "\nDecrypted: " << decrypt(msg) << endl;
 				message = msg.c_str();
 				if (sendto(s, message, strlen(message), 0, (struct sockaddr*)&server, sizeof(server)) < 0) {
 					cout << "Send Failed" << endl;
@@ -113,7 +98,16 @@ int main(int argc, char *argv[]) {
 				msgNum += 2;
 				break;
 			case 'c':
-				cout << "";
+				//Receive a reply from the server	
+				if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
+					cout << "recv failed" << endl;
+					system("pause");
+					return 1;
+				}
+				cout << "reply Received" << endl;
+				//Add \0 at the end of received string string before printing	
+				server_reply[recv_size] = '\0';	//puts(server_reply);	
+				cout << decrypt(server_reply) << endl;
 				break;
 			case 'q':
 				msg = msgNum + ";3;" + encrypt(userName);
@@ -134,7 +128,7 @@ int main(int argc, char *argv[]) {
 
 	//Add \0 at the end of received string string before printing	
 	server_reply[recv_size] = '\0';	//puts(server_reply);	
-	//cout << decrypt(server_reply) << endl;
+	cout << decrypt(server_reply) << endl;
 
 	//Program end
 	closesocket(s);

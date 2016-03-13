@@ -45,8 +45,8 @@ string encrypt(string message) {
 
 string decrypt(string message) {
 	string decryptedMsg;
-	for (int i = 0; i < message.size(); i++) {
-		decryptedMsg += encr[(int)message[i]];
+	for (int i = 8; i < message.size(); i++) {
+		decryptedMsg += decr[(int)message[i]];
 	}
 	return decryptedMsg;
 }
@@ -56,4 +56,43 @@ int msgNumber () {
 	srand(time(NULL));
 	x = rand() % 50000 + 10000;
 	return x;
+}
+
+string createMessage(string userName, string buddyName, string message, int ACK, int messageType) {
+	string msg = " ";
+	//Signon Message
+	if (messageType == 1) {
+		msg = to_string(ACK);
+		msg += ";1;";
+		msg += userName;
+	}
+	//Sendto Message
+	else if (messageType == 2) {
+		msg = to_string(ACK);
+		msg += ";2;";
+		msg += userName;
+		buddyName += '\n';
+		msg += encrypt(buddyName);
+		message += '\n';
+		msg += encrypt(message);
+		cout << "Message: " << msg << endl;
+	}
+	//Signoff Message
+	else if (messageType == 3) {
+		msg = to_string(ACK);
+		msg += ";3;";
+		msg += userName;
+	}
+	//Keep-Alive Message
+	else if (messageType = 4) {
+		msg = "ack;";
+		msg += to_string(ACK);
+		msg += ";";
+		msg += userName;
+	}
+	//Error
+	else {
+		cout << "Error: Message type dosn't exist" << endl;
+	}
+	return msg;
 }
