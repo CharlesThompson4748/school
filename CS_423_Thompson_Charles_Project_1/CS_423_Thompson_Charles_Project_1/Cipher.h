@@ -34,9 +34,7 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 
 char encrypt(char message) {
 	char encryptedMsg = ' ';
-	while(1) { 
-		encryptedMsg += encr[(int)message];
-	}
+	encryptedMsg += encr[(int)message];
 	return encryptedMsg;
 }
 
