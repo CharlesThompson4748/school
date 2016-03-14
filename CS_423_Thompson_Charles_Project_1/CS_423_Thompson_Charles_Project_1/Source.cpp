@@ -22,14 +22,10 @@
 *
 ****************************************************/
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <stdio.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <process.h>
-#include <Windows.h>
+
+
 #include "Cipher.h"
-#pragma comment(lib, "Ws2_32")
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -103,7 +99,7 @@ int main(int argc, char *argv[]) {
 	//Converting message to const char*
 	message = msg.c_str();
 	//Increasing ACK number
-	msgNum += 2;
+	msgNum++;
 
 	//Sending message to server
 	if (sendto(s, message, strlen(message), 0, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
@@ -113,6 +109,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (true) {
+		//Receive a reply from the server	
+		if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
+			cout << "recv failed" << endl;
+			system("pause");
+			return 1;
+		}
+
+		//Add \0 at the end of received string string before printing	
+		server_reply[recv_size] = '\0';
+		//Decrypting server response
+		cout << decrypt(server_reply) << endl;
 		do {
 			//Receive a reply from the server	
 			if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
@@ -146,10 +153,10 @@ int main(int argc, char *argv[]) {
 					system("pause");
 					return 1;
 				}
-				msgNum += 2;
+				msgNum++;
 				break;
 			case 'c':
-				//_beginthread(recvfrom, 0, (void*)s);
+				//_beginthread(getMessages, 0, (void*)s ,(void*)&server_reply);
 
 				//Receive a reply from the server	
 				if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {

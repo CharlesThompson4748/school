@@ -24,10 +24,16 @@
 *	according to the type of message to be sent to the server.
 *
 ****************************************************/
-
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <time.h>
 #include <iostream>
 #include <string>
+#include <stdio.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <process.h>
+#include <Windows.h>
+#pragma comment(lib, "Ws2_32")
 using namespace std;
 
 //Encryption character array
@@ -76,7 +82,7 @@ string encrypt(string message) {
 */
 string decrypt(string message) {
 	string decryptedMsg;
-	for (int i = 8; i < message.size(); i++) {
+	for (int i = 0; i < message.size(); i++) {
 		decryptedMsg += decr[(int)message[i]];
 	}
 	return decryptedMsg;
@@ -93,6 +99,18 @@ int msgNumber () {
 	srand(time(NULL));
 	x = rand() % 50000 + 10000;
 	return x;
+}
+
+void getMessages(SOCKET s, char server_reply[]) {
+	int recv_size;
+	if (recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL) == SOCKET_ERROR) {
+		cout << "recv failed" << GetLastError() << endl;
+		system("pause");
+
+	}
+	//Add \0 at the end of received string string before printing	
+	server_reply[recv_size] = '\0';
+	cout << decrypt(server_reply) << endl;
 }
 
 /*
