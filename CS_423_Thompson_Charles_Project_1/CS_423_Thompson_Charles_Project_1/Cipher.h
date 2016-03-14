@@ -1,8 +1,5 @@
-#include <time.h>
-#include <iostream>
-#include <string>
-using namespace std;
-/**************************************
+
+/****************************************************
 *   File Name:  cipher_sp14.h
 *   Author:     Bob Cotter
 *   Date:       2/20/2014
@@ -11,9 +8,29 @@ using namespace std;
 *   character substitution information needed to support
 *   the substitution cipher used in the CS423 enhanced
 *   IM project.
-********************************************/
+*
+*	This file also contains functions that we written
+*	to be used for the windows UDP client side IM service.
+*	These functions include encrypt() which will take a 
+*	string and create and encrypted string that will be
+*	returned. The decrypt() function  which takes a string 
+*	and decrpypts it using the decr character array. The 
+*	msgNumber() function which get a random 5 digit number 
+*	to be used for the ACK number for communications between
+*	the client application and the server. The createMessage()
+*	function which will take information about the user, the 
+*	im recipient, the message, the current ACK number, and
+*	the type of message and it will then create and message 
+*	according to the type of message to be sent to the server.
+*
+****************************************************/
 
+#include <time.h>
+#include <iostream>
+#include <string>
+using namespace std;
 
+//Encryption character array
 char encr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 'b', '.', 0, 'c', '[', 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 'R', 'u', ',', 'q', '\t', 'Y', '\n', '\'', 'n', 's', 'v', 'e', 'H', 'o', 'N', 'M',
@@ -24,6 +41,7 @@ char encr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 'b', '.', 0, 'c', '[', 0, 0,
 'K', '^', '1', 't', 'Q', '<', 'U', 'd', 'm', ':', 'A', 'X', '\f', '4', '~', 0,
 0, 0 };
 
+//Decryption character array
 char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 'Q', 'A', '8', '\\', '@', 'G', ':', '\'', 'D', '?', 'e', 'V', '\"', 'X', '\n', '5',
@@ -34,7 +52,13 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 '>', '#', '0', ')', 's', '!', '*', 'h', 'S', 'T', '4', 'K', 'k', 'j', '~', 0,
 0, 0 };
 
-
+/*
+*	This function takes a string a computes the 
+*	equivalent encryption from the encr character
+*	array.
+*	Input: String that will be encrypted
+*	Output: String that has been encrypted
+*/
 string encrypt(string message) {
 	string encryptedMsg;
 	for (int i = 0; i < message.size(); i++) {
@@ -43,6 +67,13 @@ string encrypt(string message) {
 	return encryptedMsg; 
 }
 
+/*
+*	This function takes a string that has been
+*	encrypted and decrypts the string using the 
+*	decr character array.
+*	Input: String that will be decrypted
+*	Output: String that has been decrypted
+*/
 string decrypt(string message) {
 	string decryptedMsg;
 	for (int i = 8; i < message.size(); i++) {
@@ -51,6 +82,12 @@ string decrypt(string message) {
 	return decryptedMsg;
 }
 
+/*
+*	This is function that will generate a random 5 digit
+*	number between 10000 and 90000.
+*	Input: None
+*	Output: Int that has been randomly generated
+*/
 int msgNumber () {
 	int x;
 	srand(time(NULL));
@@ -58,6 +95,11 @@ int msgNumber () {
 	return x;
 }
 
+/*
+*
+*	Input:
+*	Output:
+*/
 string createMessage(string userName, string buddyName, string message, int ACK, int messageType) {
 	string msg = " ";
 	//Signon Message
