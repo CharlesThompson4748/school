@@ -109,17 +109,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (true) {
-		//Receive a reply from the server	
-		if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
-			cout << "recv failed" << endl;
-			system("pause");
-			return 1;
-		}
 
-		//Add \0 at the end of received string string before printing	
-		server_reply[recv_size] = '\0';
-		//Decrypting server response
-		cout << decrypt(server_reply) << endl;
 		do {
 			//Receive a reply from the server	
 			if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
