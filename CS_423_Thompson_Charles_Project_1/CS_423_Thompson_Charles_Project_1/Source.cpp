@@ -123,17 +123,30 @@ int main(int argc, char *argv[]) {
 		do {
 			//Receive a reply from the server	
 			if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
-				cout << "recv failed" << endl;
+				cout << "recv failed" << GetLastError() << endl;
 				system("pause");
 				return 1;
 			}
+			//Checking for keep-alive message
+			if(server_reply[3] == '4') {
+				//Create keep-alive response
+				msg = createMessage(userName, userBuddy, msgToSend, msgNum, 4);
+				//Convert msg to const char*
+				message = msg.c_str();
+				//Sending message to server
+				if (sendto(s, message, strlen(message), 0, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+					cout << "Send Failed " << GetLastError() << endl;
+					system("pause");
+					return 1;
+				}
 
+			}
 			//Add \0 at the end of received string string before printing	
-			server_reply[recv_size] = '\0';
-			//Decrypting server response
-			cout << decrypt(server_reply) << endl;
+			server_reply[recv_size] = '\0';	//puts(server_reply);	
+			cout << decrypt(server_reply, 10) << endl;
+
 			//Main menu 
-			cout << "Enter q (for quit), s (send msg), or c (check for msgs)\n";
+			cout << "Enter q (for quit), s (send msg), or c (check for msgs)";
 			cin >> userSelection;
 
 			switch (tolower(userSelection)) {
@@ -185,7 +198,7 @@ int main(int argc, char *argv[]) {
 
 	//Add \0 at the end of received string string before printing	
 	server_reply[recv_size] = '\0';	//puts(server_reply);	
-	cout << decrypt(server_reply) << endl;
+	cout << decrypt(server_reply, 10) << endl;
 
 	//Program end
 	closesocket(s);
@@ -203,5 +216,5 @@ void Listen(void * temp){
 	}
 	//Add \0 at the end of received string string before printing	
 	server_reply[recv_size] = '\0';	//puts(server_reply);	
-	cout << decrypt(server_reply) << endl;
+	cout << decrypt(server_reply, 10) << endl;
 }

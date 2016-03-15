@@ -67,8 +67,14 @@ char decr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, '$', '&', 0, '|', '^', 0, 0,
 */
 string encrypt(string message) {
 	string encryptedMsg;
-	for (int i = 0; i < message.size(); i++) {
-		encryptedMsg += encr[(int)message[i]];
+	try {
+		for (int i = 0; i < message.size(); i++) {
+			encryptedMsg += encr[(int)message[i]];
+		}
+	}
+	catch (exception &e) {
+		cout << "Exception thrown: " << e.what() << endl;
+		exit(0);
 	}
 	return encryptedMsg; 
 }
@@ -80,10 +86,16 @@ string encrypt(string message) {
 *	Input: String that will be decrypted
 *	Output: String that has been decrypted
 */
-string decrypt(string message) {
+string decrypt(string message, int length) {
 	string decryptedMsg;
-	for (int i = 10; i < message.size(); i++) {
-		decryptedMsg += decr[(int)message[i]];
+	try {
+		for (int i = length; i < message.size(); i++) {
+			decryptedMsg += decr[(int)message[i]];
+		}
+	}
+	catch (exception &e) {
+		cout << "Exception thrown: " << e.what() << endl;
+		exit(0);
 	}
 	return decryptedMsg;
 }
@@ -125,7 +137,6 @@ string createMessage(string userName, string buddyName, string message, int ACK,
 		msg += encrypt(buddyName);
 		message += '\n';
 		msg += encrypt(message);
-		cout << "Message: " << msg << endl;
 	}
 	//Signoff Message
 	else if (messageType == 3) {
