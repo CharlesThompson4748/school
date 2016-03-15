@@ -9,7 +9,7 @@
 *   the substitution cipher used in the CS423 enhanced
 *   IM project.
 *
-*	This file also contains functions that we written
+*	EDIT: This file also contains functions that we written
 *	to be used for the windows UDP client side IM service.
 *	These functions include encrypt() which will take a 
 *	string and create and encrypted string that will be
@@ -82,7 +82,7 @@ string encrypt(string message) {
 */
 string decrypt(string message) {
 	string decryptedMsg;
-	for (int i = 0; i < message.size(); i++) {
+	for (int i = 10; i < message.size(); i++) {
 		decryptedMsg += decr[(int)message[i]];
 	}
 	return decryptedMsg;
@@ -101,22 +101,12 @@ int msgNumber () {
 	return x;
 }
 
-void getMessages(SOCKET s, char server_reply[]) {
-	int recv_size;
-	if (recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL) == SOCKET_ERROR) {
-		cout << "recv failed" << GetLastError() << endl;
-		system("pause");
-
-	}
-	//Add \0 at the end of received string string before printing	
-	server_reply[recv_size] = '\0';
-	cout << decrypt(server_reply) << endl;
-}
-
 /*
-*
-*	Input:
-*	Output:
+*	This function takes the usernames and message as well as the message number
+*	and message type and formats them for the server to recieve
+*	Input: Strings for the usernames and message, integers for the message
+*	number and message type
+*	Output: String formatted for the server to recieve
 */
 string createMessage(string userName, string buddyName, string message, int ACK, int messageType) {
 	string msg = " ";

@@ -9,16 +9,22 @@
 *
 *	This program is a simple client application for a IM 
 *	(Instant Messaging) service that uses a server as an 
-*	itermediate between users.
+*	itermediate between users. This program uses the a UDP
+*	connectionless service using the getaddrinfo() method
+*	from the winsock2 library. The program also uses 
+*	multi-threading to listen for server responses for 
+*	messages from other users. This is achieved using the
+*	_beginthread() function from the process.h library.
 *
-*
-*
-*
-*
-*
-*
-*
-*
+*	When the user starts this program they will be 
+*	prompted for a server and port number or the can 
+*	enter 0 for the default server	information. They 
+*	will then be asked to enter a user	name. The program 
+*	will then establish connection to the server and 
+*	indicate the other users that are connected to the IM 
+*	service. The user can the enter s to send a message to 
+*	another user, c to check for messages from other users, 
+*	or q to quit the IM service.	
 *
 ****************************************************/
 
@@ -28,16 +34,21 @@
 
 using namespace std;
 
+//Global Variables
+SOCKET s;
+int l = 0;
+
+void Listen(void * temp);
+
 int main(int argc, char *argv[]) {
 	//Default server information
 	string SERVER_ADDRESS = "204.76.188.23", SERVER_PORT = "23456";
 
 	//Variable decelerations
 	WSADATA wsa;
-	SOCKET s;
 	struct sockaddr_in server;
 	char server_reply[500], userSelection;
-	string userName, userBuddy, msgToSend, msg, temp;
+	string userName, userBuddy, msgToSend, msg, temp = "";
 	int recv_size, return_value, msgNum;
 	const char* message;
 
@@ -72,7 +83,6 @@ int main(int argc, char *argv[]) {
 	if ((return_value = getaddrinfo(SERVER_ADDRESS.c_str(), SERVER_PORT.c_str(), &server_struct, &servinfo)) != 0) {
 		printf("getaddrinfo: %s\n", GetLastError());
 		return 1;
-
 	}
 
 	//Create a socket	
@@ -84,14 +94,15 @@ int main(int argc, char *argv[]) {
 	int optval = 1;
 	setsockopt(return_value, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof optval);
 
-	cout << "Our target server is at address " << SERVER_ADDRESS << "\nOur starting message number is " << SERVER_PORT << "\nEnter your IM name... ";
+	//Getting ACK number for server
+	msgNum = msgNumber();
+
+	cout << "Our target server is at address " << SERVER_ADDRESS <<"port " << SERVER_PORT << "\nOur starting message number is " << 
+		msgNum << "\nEnter your IM name... ";
 
 	//Getting username
 	cin >> userName;
 	userName += '\n';
-	//Getting ACK number for server
-	msgNum = msgNumber();
-	cout << "ACK Num: " << msgNum << endl;
 	//Encrypting the username
 	userName = encrypt(userName);
 	//Creating message to send to server
@@ -109,7 +120,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (true) {
-
 		do {
 			//Receive a reply from the server	
 			if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
@@ -146,21 +156,15 @@ int main(int argc, char *argv[]) {
 				msgNum++;
 				break;
 			case 'c':
-				//_beginthread(getMessages, 0, (void*)s ,(void*)&server_reply);
-
-				//Receive a reply from the server	
-				if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
-					cout << "recv failed" << GetLastError() << endl;
-					system("pause");
-					return 1;
-				}
-				//Add \0 at the end of received string string before printing	
-				server_reply[recv_size] = '\0';
-				cout << decrypt(server_reply) << endl;
+				//Creating child thread to listen for server reply
+				_beginthread(Listen, 0, (void*)l);
 				break;
 			case 'q':
+				//Format the message to be sent 
 				msg = createMessage(userName, "", "", msgNum, 3);
+				//Convert the msg string to const char*
 				message = msg.c_str();
+				//Send message to the server
 				if (sendto(s, message, strlen(message), 0, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
 					cout << "Send Failed " << GetLastError() << endl;
 					system("pause");
@@ -190,3 +194,14 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
+void Listen(void * temp){
+	int recv_size;
+	char server_reply[500];
+	if ((recv_size = recvfrom(s, server_reply, 500, 0, NULL, NULL)) == SOCKET_ERROR) {
+		cout << "recv failed" << GetLastError() << endl;
+		system("pause");
+	}
+	//Add \0 at the end of received string string before printing	
+	server_reply[recv_size] = '\0';	//puts(server_reply);	
+	cout << decrypt(server_reply) << endl;
+}
